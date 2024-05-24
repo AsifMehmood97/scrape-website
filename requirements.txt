@@ -1,0 +1,7 @@
+Flask
+flask[async]
+beautifulsoup4
+requests
+gunicorn
+lxml
+aiohttp
