@@ -74,16 +74,16 @@ async def extract_all_text(url: str = Body(..., description="The site URL to be 
                     link = loc.text.strip()
                     if link not in processed_links:
                         sitemap_links.append(link)
-                all_text = handle_xml(all_text, processed_links, sitemap_links)
+                all_text = await handle_xml(all_text, processed_links, sitemap_links)
                 return JSONResponse(all_text)
             else:
                 logging.info("Sitemap.xml not found or not valid XML for {}".format(url))
             
             url_id = urls_insert(url)
             urls = [url]
-            all_text, urls = handle_site(all_text, processed_links, urls, base_url)
+            all_text, urls = await handle_site(all_text, processed_links, urls, base_url)
             extract_urls_insert(urls, url_id)
-            all_text, urls = handle_site(all_text, processed_links, urls[0:5], base_url)
+            all_text, urls = await handle_site(all_text, processed_links, urls[0:5], base_url)
             extract_urls_insert(urls, url_id)
             return JSONResponse(all_text)
         else:
@@ -93,7 +93,7 @@ async def extract_all_text(url: str = Body(..., description="The site URL to be 
             for ul in db_urls:
                 if ul[0] not in processed_links:
                     request_urls.append(ul[0])
-            all_text, urls = handle_site(all_text, processed_links, request_urls[0:5], base_url)
+            all_text, urls = await handle_site(all_text, processed_links, request_urls[0:5], base_url)
             extract_urls_insert(urls, url_id)
             return JSONResponse(all_text)
     except requests.exceptions.RequestException as e:
