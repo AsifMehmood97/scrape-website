@@ -10,11 +10,14 @@ from site_scraping import site_process_links, fetch_url_text
 import asyncio
 from db_handler import urls_insert, check_site, extract_urls_insert, get_extracted_urls
 import uvicorn
+import nest_asyncio
 
 logging.basicConfig(filename='website_crawler.log', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 app = FastAPI()
+
+nest_asyncio.apply()
 
 def handle_xml(all_text, processed_links, sitemap_links):
     loop = asyncio.new_event_loop()
