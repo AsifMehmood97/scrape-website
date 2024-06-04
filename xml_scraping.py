@@ -4,7 +4,7 @@ import logging
 from bs4 import BeautifulSoup
 from pathlib import Path
 
-async def fetch_url(url, processed_links):
+async def xml_fetch_url(url, processed_links):
     async with aiohttp.ClientSession() as session:
         if url in processed_links:
             return None, url
@@ -50,6 +50,12 @@ async def fetch_inner_links(url):
         except Exception as e:
             logging.error(f"Error fetching URL {url}: {e}")
 
+async def create_chunks(array):
+    new_array = []
+    for i in range(0, len(array), 5):
+        new_array.append(array[i:i + 5])
+    return new_array
+
 async def xml_process_links(links, processed_links):
     if len([link for link in links if link.endswith('.xml')]) > 0:
         tasks = []
@@ -60,16 +66,21 @@ async def xml_process_links(links, processed_links):
 
         links = []
         for response in responses:
-            links.extend(response)
+            for res in response:
+                if res not in processed_links:
+                    link_path = Path(res)
+                    if link_path.suffix.lower() in ['.gif', '.mov','.png', '.jpg', '.jpeg', '.svg']:
+                        continue
+                    links.append(res)
     
-        
     tasks = []
-    for link in links:
-        link_path = Path(link)
-        if link_path.suffix.lower() in ['.gif', '.mov','.png', '.jpg', '.jpeg', '.svg']:
-            continue
-        task = asyncio.create_task(fetch_url(link, processed_links))
-        tasks.append(task)
-    responses = await asyncio.gather(*tasks)
-    
-    return responses
+
+    chunked_array = await create_chunks(links)
+    for chunk in chunked_array:
+        for link in chunk:
+            task = asyncio.create_task(xml_fetch_url(link, processed_links))
+            tasks.append(task)
+        
+        return await asyncio.gather(*tasks)
+
+    return None

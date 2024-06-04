@@ -3,7 +3,35 @@ import asyncio
 from bs4 import BeautifulSoup
 import logging
 
-async def fetch_url(url, processed_links, base_url):
+async def fetch_url_text(url):
+    
+    logging.info(f"Processing URL: {url}")
+    
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                response.raise_for_status()
+
+                html = await response.text()
+
+                soup = BeautifulSoup(html, "lxml")
+
+                for tag in soup.find_all(["script", "style", "img", "canvas"]):
+                    tag.decompose()
+
+                text = soup.get_text(separator="\n").strip()
+
+                return text
+    
+    except aiohttp.ClientError as e:
+        logging.error(f"Error fetching URL {url}: {e}")
+    
+    except Exception as e:
+        logging.error(f"Unhandled exception in fetch_url for URL {url}: {e}")
+    
+    return ""
+
+async def site_fetch_url(url, processed_links, base_url):
     if url in processed_links:
         return "", set(), processed_links, url
 
@@ -42,7 +70,7 @@ async def fetch_url(url, processed_links, base_url):
 async def site_process_links(urls, processed_links, base_url):
     tasks = []
     for url in urls:
-        task = asyncio.create_task(fetch_url(url, processed_links, base_url))
+        task = asyncio.create_task(site_fetch_url(url, processed_links, base_url))
         tasks.append(task)
     responses = await asyncio.gather(*tasks)
     return responses
