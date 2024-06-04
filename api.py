@@ -43,9 +43,6 @@ async def extract_all_text(url: str = Body(..., description="The site URL to be 
     
     if not url:
         return JSONResponse({"error": "Missing/Wrong URL in request body"}), 400
-    
-    if not url_only:
-        url_only = False
 
     all_text = {}
     processed_links = set()
@@ -53,7 +50,7 @@ async def extract_all_text(url: str = Body(..., description="The site URL to be 
 
     if url_only != False:
         urls = [url]
-        all_text[url] = fetch_url_text(url)
+        all_text[url] = await fetch_url_text(url)
         return JSONResponse(all_text)
 
     try:        
