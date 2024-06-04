@@ -17,7 +17,7 @@ logging.basicConfig(filename='website_crawler.log', level=logging.INFO,
 app = FastAPI()
 
 async def handle_xml(all_text, processed_links, sitemap_links):
-    responses = await asyncio.run(xml_process_links(sitemap_links, processed_links))
+    responses = await asyncio.run(await xml_process_links(sitemap_links, processed_links))
     if responses is None:
         return all_text
     for text, link in responses:
