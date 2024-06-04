@@ -10,20 +10,14 @@ from site_scraping import site_process_links, fetch_url_text
 import asyncio
 from db_handler import urls_insert, check_site, extract_urls_insert, get_extracted_urls
 import uvicorn
-import nest_asyncio
 
 logging.basicConfig(filename='website_crawler.log', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 app = FastAPI()
 
-nest_asyncio.apply()
-
-def handle_xml(all_text, processed_links, sitemap_links):
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    responses = loop.run_until_complete(xml_process_links(sitemap_links, processed_links))
-    loop.close()
+async def handle_xml(all_text, processed_links, sitemap_links):
+    responses = await asyncio.run(xml_process_links(sitemap_links, processed_links))
     if responses is None:
         return all_text
     for text, link in responses:
@@ -31,11 +25,8 @@ def handle_xml(all_text, processed_links, sitemap_links):
             all_text[link] = re.sub(r"\s+", " ", text)
     return all_text
 
-def handle_site(all_text, processed_links, urls, base_url):
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    responses = loop.run_until_complete(site_process_links(urls, processed_links, base_url))
-    loop.close()
+async def handle_site(all_text, processed_links, urls, base_url):
+    responses = await asyncio.run(site_process_links(urls, processed_links, base_url))
     urls = []
     for text, links, _, link in responses:
         if text:
