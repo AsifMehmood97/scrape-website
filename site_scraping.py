@@ -35,7 +35,7 @@ async def site_fetch_url(url, processed_links, base_url):
     if url in processed_links:
         return "", set(), processed_links, url
 
-    processed_links.add(url)
+    processed_links.append(url)
     logging.info(f"Processing URL: {url}")
     try:
         async with aiohttp.ClientSession() as session:

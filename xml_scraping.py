@@ -8,7 +8,7 @@ async def xml_fetch_url(url, processed_links):
     async with aiohttp.ClientSession() as session:
         if url in processed_links:
             return None, url
-        processed_links.add(url)
+        processed_links.append(url)
         try:
             async with session.get(url) as response:
                 response.raise_for_status()
@@ -56,7 +56,7 @@ async def create_chunks(array):
         new_array.append(array[i:i + 5])
     return new_array
 
-async def xml_process_links(links, processed_links):
+async def extract_more_links(links, processed_links):
     if len([link for link in links if link.endswith('.xml')]) > 0:
         tasks = []
         for link in links:
@@ -73,14 +73,14 @@ async def xml_process_links(links, processed_links):
                         continue
                     links.append(res)
     
+    return links
+    
+async def xml_process_links(urls, processed_links):
+    
     tasks = []
 
-    chunked_array = await create_chunks(links)
-    for chunk in chunked_array:
-        for link in chunk:
-            task = asyncio.create_task(xml_fetch_url(link, processed_links))
-            tasks.append(task)
+    for url in urls:
+        task = asyncio.create_task(xml_fetch_url(url, processed_links))
+        tasks.append(task)
         
-        return await asyncio.gather(*tasks)
-
-    return None
+    return await asyncio.gather(*tasks)
