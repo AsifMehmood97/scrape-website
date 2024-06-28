@@ -9,11 +9,13 @@ from xml_scraping import xml_process_links, extract_more_links
 from site_scraping import site_process_links, fetch_url_text
 import uvicorn
 import pandas as pd
+from mangum import Mangum
 
 logging.basicConfig(filename='website_crawler.log', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 app = FastAPI()
+handler = Mangum(app)
 
 async def handle_xml(all_text, processed_links, urls):
     
