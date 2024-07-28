@@ -156,7 +156,7 @@ async def extract_all_text(
 
             all_text, urls = await handle_site(all_text, processed_urls, urls_without_main[0:5], base_url)
             
-            all_urls = getUniqueURLs(urls)
+            all_urls = await getUniqueURLs(urls)
             
             print("Creating JSON.")
             logging.info("Creating JSON...")
@@ -179,7 +179,7 @@ async def extract_all_text(
             if sitemap == False:
                 all_text, urls = await handle_site(all_text, processed_urls, remaining_urls[0:5], base_url) 
                 all_urls.extend(urls)
-                all_urls = getUniqueURLs(all_urls)
+                all_urls = await getUniqueURLs(all_urls)
                 print("Creating JSON.")
                 logging.info("Creating JSON...")
                 response = {
